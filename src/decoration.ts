@@ -2,9 +2,9 @@ import * as vscode from 'vscode'
 import {
     changeLeadingSpacesToNonBreaking,
     removeEmptyLines,
+    removeSpecialLines,
     toPlainText,
 } from './formatting'
-import { getMaxCount, getMaxShift } from './config'
 
 export type Decoration = {
     editor: vscode.TextEditor
@@ -16,81 +16,48 @@ export const getDecorations = async (
     editor: vscode.TextEditor,
     selections: readonly vscode.Selection[]
 ) => {
+
     if (!selections.length) return []
 
-    const maxCount = getMaxCount()
-    if (maxCount > 0 && selections.length > maxCount) return []
+    // We don't want to process > 1 selection, only show info about first symbol
+    const selection = selections[0]
 
-    const positions = selections
-        .map((selection) => selection.active)
-        .sort((a, b) => b.line - a.line || b.character - a.character)
+    const position = selection.active
 
-    const hovers = await Promise.all(
-        positions.map((position) =>
-            vscode.commands.executeCommand<vscode.Hover[]>(
-                'vscode.executeHoverProvider',
-                editor.document.uri,
-                position
-            )
+    const hover =
+        await vscode.commands.executeCommand<vscode.Hover[]>(
+            'vscode.executeHoverProvider',
+            editor.document.uri,
+            position
         )
-    )
-    const lines = hovers.map((hovers) =>
-        hovers.map(toPlainText).map(removeEmptyLines).join('\n').split('\n')
-    )
 
-    const maxShift = getMaxShift()
+    const lines =
+        hover
+        .map(toPlainText)
+        .map(removeSpecialLines)
+        .map(removeEmptyLines)
+        .join('\n')
+        .split('\n')
 
-    const getLineLength = (line: number) =>
-        editor.document.lineAt(line).range.end.character
+    const firstVisibleLine = editor.visibleRanges[0].start.line
+    const firstVisibleLineLength = editor.document.lineAt(firstVisibleLine).text.length
 
-    const layouts = positions.map((position, i) => {
-        const paddings: number[] = []
+    const text = `Please, kill me, this is cursed`
 
-        const space =
-            (i == 0 ? editor.document.lineCount : positions[i - 1].line) -
-            position.line
-        const count = Math.min(lines[i].length, space)
-
-        const startLineLength =
-            getLineLength(position.line) + Math.max(maxShift, 0)
-        for (let i = 0; i < count; i++) {
-            const lineLength = getLineLength(position.line + i)
-            if (lineLength > startLineLength) break
-
-            paddings.push(startLineLength - lineLength)
-        }
-
-        const min = Math.min(...paddings)
-        return paddings.map((padding) => padding - min)
-    })
-
-    const texts = layouts.map((paddings, i) => {
-        const texts = lines[i].slice(0, paddings.length)
-        if (lines[i].length > paddings.length) {
-            texts[texts.length - 1] += ' ...'
-        }
-
-        return texts
-    })
-
-    return layouts.flatMap((paddings, i) =>
-        paddings.map((padding, j) => ({
-            editor,
-            type: createDecorationType(texts[i][j], padding),
-            line: positions[i].line + j,
-        }))
-    )
+    return [{ editor, type: createDecorationType(text, firstVisibleLineLength), line: firstVisibleLine } ]
 }
 
-const createDecorationType = (text: string, padding: number) =>
-    vscode.window.createTextEditorDecorationType({
+const createDecorationType = (text: string, offset: number) => {
+    const line_offset = `0 0 0 0`
+    return vscode.window.createTextEditorDecorationType({
+        border: "1px solid red",
+        rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
         after: {
-            contentText: changeLeadingSpacesToNonBreaking(
-                ' '.repeat(padding) + text
-            ),
+            margin: line_offset,
+            border: "1px solid green",
+            contentText: changeLeadingSpacesToNonBreaking(text + line_offset),
             color: new vscode.ThemeColor('editorCodeLens.foreground'),
-            margin: '0 0 0 2em',
         },
-
         isWholeLine: true,
     })
+}

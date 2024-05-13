@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import { Decoration, getDecorations } from './decoration'
+import { Decoration, getDecorations as getDecoration, getDecorations } from './decoration'
 import { debounce } from './utils'
 import { getDebounceUpdate, getEnabled } from './config'
 
@@ -11,6 +11,7 @@ const startUpdate = () => {
 const cancelUpdate = () => tokenSource?.cancel()
 
 let currentDecorations: Decoration[] = []
+
 const setDecorations = (decorations: Decoration[]) => {
     for (const { type } of currentDecorations) {
         type.dispose()
@@ -28,11 +29,13 @@ const updateDecorations = debounce(
         if (!getEnabled()) return
 
         const token = startUpdate()
+        const selections = event.selections
 
         const decorations = await getDecorations(
             event.textEditor,
-            event.selections
+            selections
         )
+
         if (token.isCancellationRequested) return
 
         setDecorations(decorations)
@@ -44,7 +47,6 @@ export const activate = (context: vscode.ExtensionContext) => {
     context.subscriptions.push(
         vscode.workspace.onDidChangeConfiguration(() => {
             if (getEnabled()) return
-
             cancelUpdate()
             setDecorations([])
         })
@@ -56,4 +58,6 @@ export const activate = (context: vscode.ExtensionContext) => {
             updateDecorations(event)
         })
     )
+
+    // TODO: update (scroll) current decorations on viewport changes
 }

@@ -1,13 +1,10 @@
 import * as vscode from 'vscode'
 
 export const getEnabled = () =>
-    vscode.workspace.getConfiguration('hoverlens').get('enabled', true)
-
-export const getMaxCount = () =>
-    vscode.workspace.getConfiguration('hoverlens').get('maximumCursorCount', 3)
+    vscode.workspace.getConfiguration('cornerlens').get('enabled', true)
 
 export const getDebounceUpdate = () =>
-    vscode.workspace.getConfiguration('hoverlens').get('debounceUpdate', 50)
+    vscode.workspace.getConfiguration('cornerlens').get('debounceUpdate', 50)
 
 export const getMaxShift = () =>
-    vscode.workspace.getConfiguration('hoverlens').get('maximumShiftCount', 20)
+    vscode.workspace.getConfiguration('cornerlens').get('maximumShiftCount', 20)

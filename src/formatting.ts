@@ -18,6 +18,12 @@ export const removeEmptyLines = (text: string) =>
         .filter((line) => !!line)
         .join('\n')
 
+export const removeSpecialLines = (text: string) =>
+    text
+        .split('\n')
+        .filter((line) => !line.includes("$(telescope)"))
+        .join('\n')
+
 export const changeLeadingSpacesToNonBreaking = (line: string) => {
     let i = 0
     for (; i < line.length; i++) {

@@ -1,44 +1,40 @@
 {
-  "name": "hoverlens",
-  "version": "1.3.0",
-  "publisher": "NonSpicyBurrito",
+  "name": "cornerlens",
+  "version": "1.0.0",
+  "publisher": "vlza",
   "engines": {
     "vscode": "^1.71.0"
   },
   "license": "MIT",
-  "displayName": "Hover Lens",
-  "description": "Show hover information as end of line decoration.",
+  "displayName": "Corner Lens",
+  "description": "Show hover in the rightmost corder of the editor (lsp-mode style).",
   "categories": [
     "Other"
   ],
   "keywords": [
-    "hover"
+    "hover",
+    "lens"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/NonSpicyBurrito/hoverlens.git"
+    "url": "https://github.com/vzarytovskii/cornerlens.git"
   },
   "main": "./dist/extension.js",
   "contributes": {
     "configuration": {
-      "title": "Hover Lens",
+      "title": "Corner Lens",
       "properties": {
-        "hoverlens.enabled": {
-          "description": "Whether Hover Lens is enabled or not.",
+        "cornerlens.enabled": {
+          "description": "Whether Corner Lens is enabled or not.",
           "type": "boolean",
           "default": true
         },
-        "hoverlens.maximumCursorCount": {
-          "description": "Maximum cursor count which hover information will be displayed (set to 0 for unlimited).\nDisplaying hover information for too many cursors may degrade editor performance.",
-          "type": "number",
-          "default": 3
-        },
-        "hoverlens.debounceUpdate": {
+        "cornerlens.debounceUpdate": {
           "description": "Debounce hover information update (set to 0 for no debounce).\nUpdating hover information too quickly may degrade editor performance.",
           "type": "number",
           "default": 50
         },
-        "hoverlens.maximumShiftCount": {
+        "cornerlens.maximumShiftCount": {
           "description": "Maximum character count which multiline hover information is allowed to be shifted to avoid being cut off.",
           "type": "number",
           "default": 40
